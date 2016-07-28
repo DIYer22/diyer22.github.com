@@ -1,0 +1,508 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+
+	<meta charset="UTF-8">
+	<title>uce.000</title>
+
+<!-- 	<script src="./js/jquery.min.js">
+	</script>
+	<script src="./js/bootstrap.min.js">
+	</script>
+	<link href="./js/bootstrap.min.css" rel="stylesheet" type="text/css"> -->
+<!-- 
+   <link href="http://apps.bdimg.com/libs/bootstrap/3.3.0/css/bootstrap.min.css" rel="stylesheet">
+   
+   <script src="http://apps.bdimg.com/libs/bootstrap/3.3.0/js/bootstrap.min.js"></script>
+	 -->
+	 <script src="http://apps.bdimg.com/libs/jquery/2.0.0/jquery.min.js"></script>
+	 
+	<script src="http://cdn.bootcss.com/dat-gui/0.5.1/dat.gui.js"></script>
+	<style>
+
+	</style>
+
+	<script>
+
+function debug(x){  //debug
+  var div = document.getElementById('debug');
+  div.innerHTML = x+'<br><br>'+div.innerHTML
+
+}
+	</script>
+
+</head>
+
+<body>
+
+	<div id="debug" style="width:400px;position:fixed;top:50px;left:60%;background:white;opacity: 0.5" >
+
+	</div>
+
+	<canvas id="canvas" width="500" height="400" style="border: 1px solid gray;">
+
+	</canvas>
+
+</body>
+
+<script>
+
+
+var led = {  // 单个led灯
+	"size" : 20,
+	"color": "rgba(128,128,128,0.99)",
+
+	"powerOffColor": "rgba(232,232,232,0.3)",  // 未通电led颜色
+	"secondColor":"rgba(232,179,34,0.99)",
+	"drawLed" : function(x,y,du,ctx,color) {
+		if (!color) {
+			color=this.color
+		};
+		var w = this.size 
+		var h = this.size/this.proportion
+		var raw = Math.PI*du/180
+
+		if(du>45&&du<135){  // 如果为竖着 缩小比例
+			w = this.size*this.rowProportionCol
+		}
+
+		ctx.save()  // 移动画布
+		ctx.fillStyle=color
+		ctx.translate(x,y)
+		ctx.rotate(raw)
+
+		//创建描绘路径
+		var str = (-(w-h)/2)+" "+ (-h/2)+","+(-w/2)+" 0, "+(-(w-h)/2)+" "+ (h/2)+","+((w-h)/2)+" "+ (h/2)+","+(w/2)+" 0, "+((w-h)/2)+" "+ (-h/2)
+		
+
+
+
+		qDraw(str,ctx)
+		ctx.restore()
+		function qDraw (str,ctx) {
+			// console.log("str="+str)
+			ctx.beginPath()
+			var arr=str.replace(/,/g," ").split(" ").filter(function(e) {return e}).map(function(e) {return parseFloat(e)})
+
+			ctx.moveTo(arr[0],arr[1])
+			for (var i = 2; i < arr.length; i+=2) {
+				ctx.lineTo(arr[i],arr[i+1])
+			};
+			ctx.lineTo(arr[0],arr[1])
+			ctx.fill()
+		}
+		
+
+	},
+	"drawChar" : function(x,y,char,ctx) {
+		var ld = this.ledDistanceProportion*this.size
+		var w = this.size
+		var h = this.size/this.proportion
+		var w2 = this.size*this.rowProportionCol  // 数组的缩短后的width
+		var arr = this.ledPosArr = [  //7段对应led
+			[h/2+ld+w/2,h/2,0],  //a
+			[h/2+2*ld+w,h/2+ld+w2/2,90],  //b
+			[h/2+2*ld+w,h/2+3*ld+3*w2/2,90],  //c
+			[h/2+ld+w/2,h/2+4*ld+2*w2,0],
+			[h/2,h/2+3*ld+3*w2/2,90],
+			[h/2,h/2+ld+w2/2,90],
+			[h/2+ld+w/2,h/2+w2+2*ld,0],  //g
+		]
+
+		var str = this.charToBit[char]
+		for (var i = 0; i < str.length; i++) {
+			if(str[i]=='1'){
+				this.drawLed(x+arr[i][0],y+arr[i][1],arr[i][2],ctx,this.color)
+			}
+			if(str[i]=='2'){
+				this.drawLed(x+arr[i][0],y+arr[i][1],arr[i][2],ctx,this.secondColor)
+			}
+			if(str[i]=='0'){
+				this.drawLed(x+arr[i][0],y+arr[i][1],arr[i][2],ctx,this.powerOffColor)
+			}
+		}
+		return x+this.size*this.charDistanceProportion
+	},
+
+	"drawStr" : function  (x,y,str,ctx) {
+
+		for (var i = 0; i < str.length; i++) {
+			if(str[i]=='.'){
+				x=this.dot.draw(x,y,ctx)
+				continue
+			}
+			if(str[i]==':'){
+				x=this.dot.drawColon(x,y,ctx)
+				continue
+			}
+
+			x=this.drawChar(x,y,str[i],ctx)
+			
+		}
+		return x		
+	},
+	"dot" : {  // h 的点
+		proportion:5,
+		charDistanceProportion:0.7,
+		draw:function  (x,y,ctx,color) {  //返回下一个x的起点
+			if (!color) {
+				color=led.color
+			};
+			var r=led.size/this.proportion
+			
+
+			var ld = led.ledDistanceProportion*led.size
+			var w = led.size
+			var h = led.size/led.proportion
+			var w2 = led.size*led.rowProportionCol  // 数组的缩短后的width
+			var dx=led.size*led.charDistanceProportion
+			ctx.save()
+		    ctx.beginPath();
+		    ctx.arc(x+r-dx*0.1, (h+4*ld+2*w2+y-r), r, 0, Math.PI*2, true)
+
+		    ctx.closePath()
+		    ctx.fillStyle=color
+		    ctx.fill()
+		    ctx.restore()
+			return this.charDistanceProportion*led.size+x
+		},
+		drawColon:function  (x,y,ctx,color) {  //返回下一个x的起点
+			if (!color) {
+				color=led.color
+			};
+			var r=led.size/this.proportion
+			
+
+			var ld = led.ledDistanceProportion*led.size
+			var w = led.size
+			var h = led.size/led.proportion
+			var w2 = led.size*led.rowProportionCol  // 数组的缩短后的width
+			var dx=led.size*led.charDistanceProportion
+			ctx.save()
+		    ctx.beginPath();
+		    ctx.arc(x+r-dx*0.1,y+ h/2+ld+w2/2, r, 0, Math.PI*2, true)
+		    ctx.arc(x+r-dx*0.1,y+ h/2+3*ld+3*w2/2, r, 0, Math.PI*2, true)
+
+		    ctx.closePath()
+		    ctx.fillStyle=color
+		    ctx.fill()
+		    ctx.restore()
+			return this.charDistanceProportion*led.size+x
+		},
+	},
+	//常量
+	"proportion":3.1, //宽高比
+	"ledDistanceProportion":0.0416,  //led距离比
+	"charDistanceProportion":2,  // char的距离比
+	"rowProportionCol":0.81,  // led 竖着方比横着放小
+	"charToBit":{  //译码表
+		0 :"1111110",
+		1 :"0110000",
+		2 :"1101101",
+		3 :"1111001",
+		4 :"0110011",
+		5 :"1011011",
+		6 :"1011111",
+		7 :"1110000",
+		8 :"1111111",
+		9 :"1111011",
+		a :"1110111",
+		b :"0011111",
+		c :"1001110",
+		d :"0111101",
+		e :"1001112",
+		f :"1000111",
+		g :"1011110",
+		h :"0110111",
+
+		o :"1111110",
+		l :"0001110",
+		y :"0111011",
+		u :"0111110",
+
+		" " :"0000000",
+		"_" :"0001000",
+		"-" :"0000001",
+
+	},
+	"ledPosArr":[  //7段对应led
+
+	]
+} 
+
+var ctx = document.getElementById('canvas').getContext('2d');
+
+
+
+var gui = new dat.GUI();
+gui.add(led, 'size',0,90).listen();
+gui.add(led, 'proportion',0,20).listen();
+gui.add(led, 'ledDistanceProportion',-2,3).listen();
+gui.add(led, 'charDistanceProportion',-2,4).listen();
+gui.add(led, 'rowProportionCol',-2,3).listen();
+gui.addColor(led, 'color').listen();
+gui.addColor(led, 'powerOffColor').listen();
+gui.addColor(led,'secondColor').listen()
+gui.remember(led)
+gui.add(window,"getFat")
+gui.remember(led)
+function getFat () {
+	loopOne (led,aim,1,1)
+}
+
+
+var count = 1
+var str = count+''
+function animation () {
+	
+	str = ("00"+parseInt(count/60)%1000+'')
+	str = str.slice(str.length-3,str.length)
+
+	if(count==60000){count=0}
+	count++
+	
+	ctx.clearRect(0,0, canvas.width, canvas.height);
+
+	var y=120
+	var x=50
+	var dx=led.size*led.charDistanceProportion
+	x=led.drawStr(x,y,"uc",ctx)
+	x=led.drawStr(x-0.15*dx,y,"e",ctx)
+	x=led.dot.draw(x,y,ctx)
+	led.drawStr(x,y,""+str,ctx)
+	var myDate = new Date();
+	led.drawStr(50,50,myDate.getHours()+":"+myDate.getMinutes()+":"+myDate.getSeconds(),ctx)
+	window.requestAnimationFrame(animation)
+}
+animation()
+// led.drawStr(50,100,'2015 07 23',ctx)
+
+function deepCopy(p, c) {
+	var c = c || {};
+	for (var i in p) {
+		if (typeof p[i] === 'object') {
+			c[i] = (p[i].constructor === Array) ? [] : {};
+			deepCopy(p[i], c[i]);
+		} else {
+			c[i] = p[i];
+		}
+	}
+	return c;
+}
+
+var Key=function() {
+	// body...
+	var o={
+		timeGap:16,  // every frame time
+		animation:function(obj,aim,t,timeOut){
+			if(!timeOut){timeOut=0}
+			this.timeOut=timeOut=1000*timeOut
+			this.t=t=1000*t
+			this.obj=obj
+			this.aim=aim
+			this.getDx()
+			window._keyArr= window._keyArr?window._keyArr:[]
+			window._keyArr.push(this)
+			var index=_keyArr.length-1
+
+			function _setInt() {
+				_keyArr[index].beginTime=new Date().getTime()
+				// console.log(new Date().getTime()-_keyArr[index].logt)
+				_keyArr[index].id=setInterval(function  () {
+					_keyArr[index].change()
+				},this.timeGap);
+
+				setTimeout(function  () {  // 剪掉一帧并 手动精确绘制最后一帧
+					clearInterval(_keyArr[index].id)
+					for (var i in _keyArr[index].dx) {  // 手动精确绘制最后一帧
+						if(typeof _keyArr[index].dx[i] == "number"){
+							_keyArr[index].obj[i]=_keyArr[index].aim[i]
+						}			
+					}
+
+				},t-_keyArr[index].timeGap)	
+			}
+
+			// this.logt=new Date().getTime()
+			if(timeOut<110){  // 直接用setTimeOut(,0) 会有220ms的延迟
+				_setInt()
+				return
+			}
+			
+			
+			// 由于闭包作用 index 会传参数进去
+			setTimeout(function  () {  // 开始计时
+				_setInt()
+			},timeOut)
+			return this.old
+		},
+		dx:{
+
+		},
+		old:{
+
+		},
+		getDx:function() {  // every frame`s d(x)
+			// var times=this.t/this.timeGap
+			for (var i in this.aim) {
+				if(typeof this.aim[i] == "number"){
+					this.old[i]=this.obj[i]
+					this.dx[i]=(this.aim[i]-this.obj[i])/this.t
+				}
+			}
+		},
+		change:function() {
+			for (var i in this.dx) {
+				if(typeof this.dx[i] == "number"){
+					var timeDiff=(new Date().getTime()-this.beginTime)
+					this.obj[i]=this.dx[i]*timeDiff+this.old[i]
+					console.info(timeDiff)
+				}			
+			}
+		},
+	}
+	return o
+}
+
+var aim={
+	size:40,
+
+	ledDistanceProportion:0.04221555555,
+	charDistanceProportion:2,
+	rowProportionCol:1,
+	// color:led.color,
+	// powerOffColor:led.powerOffColor,
+}
+
+// Key().animation(led,aim,2,2)
+
+// Key().animation(led,{	proportion:1,},4)
+
+
+
+var Color={  // 处理演示渐变
+	rgbToHex : function(rgb) {
+	    // rgb(x, y, z)
+	    var color = rgb.toString().match(/\d+/g); // 把 x,y,z 推送到 color 数组里
+	    var hex = "#";
+
+	    for (var i = 0; i < 3; i++) {
+
+	        hex += ("0" + Number(color[i]).toString(16)).slice(-2);
+	    }
+	    return hex;
+	},
+	hexToRgb : function(hex) {
+	    var rgb = [];
+
+	    hex = hex.substr(1);//去除前缀 # 号
+
+	    if (hex.length === 3) { // 处理 "#abc" 成 "#aabbcc"
+	        hex = hex.replace(/(.)/g, '$1$1');
+	    }
+
+	    hex.replace(/../g, function(color){
+	        rgb.push(parseInt(color, 0x10));//按16进制将字符串转换为数字
+	    });
+
+	    return "rgb(" + rgb.join(",") + ")";
+	},
+}
+
+
+var Key=function() {
+	// body...
+	var o={
+		timeGap:16,  // every frame time
+		animation:function(obj,aim,t,timeOut){
+			if(!timeOut){timeOut=0}
+			this.timeOut=timeOut=1000*timeOut
+			this.t=t=1000*t
+			this.obj=obj
+			this.aim=aim
+			
+			window._keyArr= window._keyArr?window._keyArr:[]
+			window._keyArr.push(this)
+			var index=_keyArr.length-1
+
+			function _setInt() {
+				_keyArr[index].getDx()
+				_keyArr[index].beginTime=new Date().getTime()
+				// console.log(new Date().getTime()-_keyArr[index].logt)
+				_keyArr[index].id=setInterval(function  () {
+					_keyArr[index].change()
+				},this.timeGap);
+
+				setTimeout(function  () {  // 剪掉一帧并 手动精确绘制最后一帧
+					clearInterval(_keyArr[index].id)
+					for (var i in _keyArr[index].dx) {  // 手动精确绘制最后一帧
+						if(typeof _keyArr[index].dx[i] == "number"){
+							_keyArr[index].obj[i]=_keyArr[index].aim[i]
+						}			
+					}
+
+				},t-_keyArr[index].timeGap)	
+			}
+
+			// this.logt=new Date().getTime()
+			if(timeOut<110){  // 直接用setTimeOut(,0) 会有220ms的延迟
+				_setInt()
+				
+			}else{
+				// 由于闭包作用 index 会传参数进去
+				setTimeout(function  () {  // 开始计时
+					_setInt()
+				},timeOut)				
+			}
+			return this.old
+		},
+		dx:{
+
+		},
+		old:{
+
+		},
+		getDx:function() {  // every frame`s d(x)
+			// var times=this.t/this.timeGap
+			for (var i in this.aim) {
+				if(typeof this.aim[i] == "number"){
+					this.old[i]=this.obj[i]
+					this.dx[i]=(this.aim[i]-this.obj[i])/this.t
+				}
+			}
+		},
+		change:function() {
+			for (var i in this.dx) {
+				if(typeof this.dx[i] == "number"){
+					var timeDiff=(new Date().getTime()-this.beginTime)
+					this.obj[i]=this.dx[i]*timeDiff+this.old[i]
+				}			
+			}
+		},
+	}
+	return o
+}
+
+var aim={
+	size:20,
+	proportion:1,
+	ledDistanceProportion:0.04221555555,
+	charDistanceProportion:2,
+	rowProportionCol:1,
+	// color:led.color,
+	// powerOffColor:led.powerOffColor,
+}
+
+
+function loopOne (obj,aim,t,stop) {
+	var old = Key().animation(obj,aim,t)
+	console.log(old)
+	Key().animation(obj,old,t,t+stop)
+}
+
+
+
+</script>
+
+</html>
