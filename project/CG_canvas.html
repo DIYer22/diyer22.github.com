@@ -1,0 +1,434 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+
+	<meta charset="UTF-8">
+	<title>计算机图形学 by 小磊</title>
+	<!-- <script src="./js/jquery.min.js">
+	</script>
+	<script src="./js/bootstrap.min.js">
+	</script>
+	<link href="./js/bootstrap.min.css" rel="stylesheet" type="text/css"> -->
+	<link href="http://apps.bdimg.com/libs/bootstrap/3.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <script src="http://apps.bdimg.com/libs/jquery/2.0.0/jquery.min.js"></script>
+    <script src="http://apps.bdimg.com/libs/bootstrap/3.3.0/js/bootstrap.min.js"></script>
+	 
+	<style>
+
+	</style>
+
+	<script>
+
+function debug(x){  //debug
+  var div = document.getElementById('debug');
+  div.innerHTML = x+'<br><br>'+div.innerHTML
+
+}
+
+function deepCopy(p, c) {
+	var c = c || {};
+	for (var i in p) {
+		if (typeof p[i] === 'object') {
+			c[i] = (p[i].constructor === Array) ? [] : {};
+			deepCopy(p[i], c[i]);
+		} else {
+			c[i] = p[i];
+		}
+	}
+	return c;
+}
+
+
+int = parseInt
+float = parseFloat
+pow = Math.pow
+log = console.log
+
+info = console.info
+table = console.table
+len= (x)=>x.length
+rn = (x)=>int(x*Math.random())
+sum = (arr)=>{
+        var summ = 0
+        for (var i in arr){
+                summ += arr[i]
+        }
+        return summ
+}
+function range (f,n,max) {
+	// 1.Python 用法
+	// 2.执行 f(n['property']) 并返回新的 [] 或 {}
+	// range(10) =>[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+	// range(x=>x*2,5,10) =>[10, 12, 14, 16, 18]
+	// range(x=>x+x,['a', 'b', 'c'])
+	// =>["aa", "bb", "cc"]
+
+	var flag = (typeof f == "number")
+
+	if(flag){
+		max =(typeof n == "number")?n:max
+		n = f
+		f = x=>x
+	}
+	var items = n
+	var obj = (n.constructor === Array)?[]:{}
+	if(typeof n == "number"){
+		obj = []
+		items = []
+		var i=max?n:0
+		max=max||n
+		while(i!=max){items.push(i);i++}
+	}
+
+ 	for (var i in items) {
+ 		obj[i]=f(items[i])
+ 	}
+ 	return obj
+ }
+
+
+	</script>
+
+</head>
+
+<body>
+
+	<div id="debug" style="width:400px;position:fixed;top:50px;left:60%;background:white;opacity: 0.5" >
+
+	</div>
+
+	<canvas id="canvas" width="800" height="600" style="border: 1px solid gray;">
+
+	</canvas>
+	<br>
+	<small>* 不输入数据 直接点击OK 则以默认数据计算</small>
+	<br>
+	<small>** 请用火狐，Chrome或含Chrome内核的浏览器打开 IE浏览器对JavaScript标准支持不佳 建议不要使用IE</small>
+
+	<!-- <div style="position:absolute;top:10px;left:820px;"> -->
+	<div>
+		<button id='add-button' class="btn btn-info" onclick="javascript:init()" style="display:inline">clear</button>
+		<br>
+		<h3>画椭圆：</h3>
+		　　a=
+		<input type='text' id='a' class="form-control" placeholder="300" style="width:50px;display:inline">
+		b=
+		<input type='text' id='b' class="form-control" placeholder="200" style="width:50px;display:inline">
+		<button id='add-button' class="btn btn-info" onclick="javascript:ellipse()" style="display:inline">OK</button>
+		<br>
+		<br>
+		<h3>线扫描填充：</h3>
+		　　依次输入对应点x,y值
+		<br>
+		　　<input type='text' id='fill' class="form-control" placeholder="默认为六边形：“-100 100 100 100 150 0 100 -100 -100 -100 -150 0”" style="width:470px;display:inline">
+		<button id='add-button' class="btn btn-info" onclick="javascript:fill()" style="display:inline">OK</button>
+		<br>
+		<br>
+
+
+		<h3>多边形绕点旋转：</h3>
+		　　旋转点的坐标：
+		<input type='text' id='rotate-point' class="form-control" placeholder="默认为点“1 1”" style="width:120px;display:inline">
+		<br>
+		　　旋转角度：
+		<input type='text' id='du' class="form-control" placeholder="默认为“30”度" style="width:120px;display:inline">
+		<br>
+		　　依次输入多边形点的x,y值
+		<br>
+		　　<input type='text' id='tran' class="form-control" placeholder="默认为六边形：“-100 100 100 100 150 0 100 -100 -100 -100 -150 0”" style="width:470px;display:inline">
+		<button id='add-button' class="btn btn-info" onclick="javascript:tran()" style="display:inline">OK</button>
+
+		<br>
+		<br>
+
+
+		<h3>贝兹曲线：</h3>
+		　　依次输入对应点x,y值
+		<br>
+		　　<input type='text' id='curve' class="form-control" placeholder="默认为：“0 0 0 200 200 200 200 0”" style="width:470px;display:inline">
+		<button id='add-button' class="btn btn-info" onclick="javascript:curve()" style="display:inline">OK</button>
+		
+		<br>
+		<br><br><br>
+	</div>
+</body>
+
+<script>
+
+var axesColor = 'rgba(22,22,22,0.3)'
+var pointColor = 'black'
+
+
+
+function ellipse () {
+	MidpointEllipse($('#a').val()||300,$('#b').val()||200)
+}
+
+var ctx = document.getElementById('canvas').getContext('2d');
+
+
+var h = int($('#canvas').attr('height'))
+var w = int($('#canvas').attr('width'))
+
+// 画坐标
+function init () {
+	ctx.restore()
+	ctx.clearRect(0,0,w,h)
+	window.points = range((x)=>range((x)=>0,w),range(h))
+	ctx.save() 
+	ctx.translate(w/2,h/2)
+	ctx.strokeStyle = axesColor
+	ctx.beginPath()
+	ctx.moveTo(-w/2,0)
+	ctx.lineTo(w/2,0)
+	ctx.moveTo(0,h/2)
+	ctx.lineTo(0,-h/2)
+	ctx.stroke()
+}
+
+
+
+init()
+
+function drawPixel (x,y,c) {  //画点
+	y = -y
+	var ctx = window.ctx
+	c = c||window.pointColor
+	ctx.fillRect(x,y,1,1)
+	ctx.stroke()
+
+	// window.points[int(y+0.5-h/2)][int(x+0.5-w/2)]=1
+}
+
+function qDraw (points,l,c) {
+			var ctx = window.ctx
+			ctx.beginPath()
+			ctx.strokeStyle=c||'#bbbbbb'
+			ctx.moveTo(points[0][0],-points[0][1])
+			for (var i = 1; i < points.length; i++) {
+				ctx.lineTo(points[i][0],-points[i][1])
+			};
+			l||ctx.lineTo(points[0][0],-points[0][1])
+			ctx.stroke()
+		}
+
+function drawL (y,x1,x2,c) {
+	for (var i = x1; i <=x2; i++) {
+		drawPixel(i,y,c)
+	};
+}
+draw4p= function (x,y,c) {
+	drawPixel(x,y,c)
+	drawPixel(-x,y,c)
+	drawPixel(x,-y,c)
+	drawPixel(-x,-y,c)
+}
+dp = draw4p
+sqr = (x)=>pow(x,0.5)
+
+
+
+MidpointEllipse = function(a,b,color){
+	var x,y;
+	var d1,d2;
+	x=0;y=b;
+	d1=b*b+a*a*(-b+0.25);
+	draw4p(x,y,color);
+	while (b*b*(x+1)<a*a*(y-0.5)){
+		if(d1<0){
+			d1+=b*b*(2*x+3);
+			x++;
+		}else {
+			d1+=b*b*(2*x+3)+a*a*(-2*y+2);
+			x++;y--;
+		}
+		draw4p(x,y,color);
+	}
+	d2=sqr(b*(x+0.5)+sqr(a*(y-1))-sqr(a*b));
+	while(y>0){
+		if (d2<0){
+			d2+=b*b*(2*x+2)+a*a*(-2*y+3);
+			x++;
+			y--;
+		}else {
+			d2+=a*a*(-2*y+3);
+			y--;
+		}
+		draw4p(x,y,color);
+	}
+}
+
+
+strToPoints = function(str,tag) {
+	var arr=str.replace(/,/g," ").split(" ").filter(function(e) {return e}).map(function(e) {return parseFloat(e)})
+	var l=[]
+	for (var i = 0; i < arr.length; i+=2) {
+		l.push([arr[i],arr[i+1]])
+	};
+	if(arr[0]==arr[arr.length-2]&&arr[1]==arr[arr.length-1]){  // 避免重复
+		tag||l.pop()
+	}
+	return l
+}
+
+
+
+Line = function  (points) {
+	// 含有两个点的数组为参数
+	// 生成 Line对象实例并返回
+	var o = {}
+	o.b= points[0][1]>points[1][1]?points[1]:points[0] //y较小的点
+	o.e= points[0][1]>points[1][1]?points[0]:points[1]  // y较大的点
+	o.x= o.b[0]-o.e[0]
+	o.y= o.b[1]-o.e[1]
+	o.k= o.y/o.x  //斜率
+	o.min=o.b[1]  
+
+	o.now=o.b[0] // 这条线当前与扫描线的交点的横坐标
+	o.d=1/o.k  // delt x  增量
+	o.max=o.e[1]  //y max
+	return o
+}
+
+fill = function  () {
+	var str=$('#fill').val()||'-100 100 100 100 150 0 100 -100 -100 -100 -150 0'
+	var points = strToPoints(str) // 将输入转换为点的数组
+	var net = {}  // 哈希结构的NET
+	for (var i = 0; i < points.length; i++) {
+		// 生成所有线段并记录低端点到net
+		var line = new Line([points[i],points[(i+1)%points.length]])
+		net[line.min]=line.min in net?[line,...net[line.min]]:[line]
+	};
+	var aet=[]  // 活性边表AET
+	for (var i = -h/2; i < h/2; i++) {
+		// 扫描线
+		if( i in net){// 若有第一次出现的边 则加入AET
+			aet=[...aet,...net[i]]
+		}
+		var tag=[] 
+		for (var j = 0; j < aet.length; j++) {
+			//递增x并记录将被清除的活性边
+			aet[j].now+=aet[j].d
+			if(i >= aet[j].e[1]){
+				tag.push(j)
+			}
+		};
+		if(tag.length!=0){
+			//清除活性边
+			var tmp=[]
+			for (var j = 0; j < aet.length; j++) {
+				if (tag.indexOf(j)==-1){
+					tmp.push(aet[j])
+				}
+			}
+			aet = tmp
+		};			
+		//排序	
+		aet.sort((x,y)=>x.now>y.now)
+		
+		for (var j = 0; j < aet.length; j+=2) {
+			// 成对画水平线
+			drawL(i, aet[j].now,aet[j+1].now)
+		};
+
+	};
+
+}
+
+function curve(){
+	var str=$('#curve').val()||'0 0 0 200 200 200 200 0'
+	'1 1 99 -99 -200 10'
+	var points = strToPoints(str,true) // 将输入转换为点的数组
+
+	qDraw(points,1)  // 画出输入的原始路径
+
+	function newP(p,k){ // 对老的points 生成子points
+		np=[]
+		for (var i = 0; i < p.length-1; i++) {
+			np.push([-(p[i][0]-p[i+1][0])*k+p[i][0],-(p[i][1]-p[i+1][1])*k+p[i][1]])
+		};
+		return np
+
+	}
+
+	// 由输入总路径长度估计时间间隔
+	var time = 0.5/sum(range(points.length-1).map((i)=>pow(pow(points[i][0]-points[i+1][0],2) + pow(points[i][1]-points[i+1][1],2),0.5)))
+
+	for (var k = 0; k <=1; k+=time) {
+		// 对每步画点
+		var p=points
+		while(1){
+			p = newP(p,k)
+			// 不断迭代 直到生成唯一的一个点
+			if(p.length==1){
+				drawPixel(p[0][0],p[0][1])
+				break
+			}
+		}
+
+	};
+	// 画上最后一点
+	drawPixel(points[points.length-1][0],points[points.length-1][1])
+}
+
+function tran() {
+	var str=$('#tran').val()||'-100 100 100 100 150 0 100 -100 -100 -100 -150 0'
+	var du=int($('#du').val()||'30')
+	var rotatePoint=($('#rotate-point').val()||'1 1').split(' ').filter(
+	(x)=>x).map((x)=>int(x))  // 旋转点
+
+	var points = strToPoints(str)  // 将输入转换为点的数组
+
+	qDraw(points)  // 画出输入的图像
+
+	// 生成单位矩阵的函数
+	matrix =()=>range((x)=>range((y)=>x==y?1:0,3),3)
+
+	// 点p乘矩阵t 返回新的点 
+	mul=(p, t)=>[
+					p[0]*t[0][0]+p[1]*t[1][0]+(p[2]||1)*t[2][0],
+					p[0]*t[0][1]+p[1]*t[1][1]+(p[2]||1)*t[2][1],
+					p[0]*t[0][2]+p[1]*t[1][2]+(p[2]||1)*t[2][2]
+				]
+
+	function rotate(t,du){
+		// 将t变为 能旋转 du度的矩阵
+		var rad = Math.PI*du/180
+		
+		t[0][0] = Math.cos(rad)
+		t[0][1] = Math.sin(rad)
+		t[1][0] =-Math.sin(rad)
+		t[1][1] = Math.cos(rad)
+
+	}
+
+	// 对数组points里面的所有点进行矩阵t的转换
+	mapMul = (points,t)=> points.map((p)=>mul(p,t))
+
+	var t=[
+		[1,0,0],
+		[0,1,0],
+		[0,0,1],
+	]
+	// 先相对旋转点平移
+	var t=matrix()  // 生成单位矩阵
+	t[2][0]=-rotatePoint[0]  
+	t[2][1]=-rotatePoint[1]
+	points=mapMul(points,t)
+	// 旋转
+	t=matrix()
+	rotate(t,du)
+	points=mapMul(points,t)
+	// 平移回来
+	t=matrix()
+	t[2][0]=rotatePoint[0]
+	t[2][1]=rotatePoint[1]
+	points=mapMul(points,t)
+	qDraw(points)  // 画变换后的图
+
+}
+
+</script>
+
+</html>
