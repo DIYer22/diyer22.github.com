@@ -13,7 +13,7 @@
 	<link href="http://apps.bdimg.com/libs/bootstrap/3.3.0/css/bootstrap.min.css" rel="stylesheet">
     <script src="http://apps.bdimg.com/libs/jquery/2.0.0/jquery.min.js"></script>
     <script src="http://apps.bdimg.com/libs/bootstrap/3.3.0/js/bootstrap.min.js"></script>
-	 
+
 	<style>
 
 	</style>
@@ -146,9 +146,9 @@ function range (f,n,max) {
 		<h3>贝兹曲线：</h3>
 		　　依次输入对应点x,y值
 		<br>
-		　　<input type='text' id='curve' class="form-control" placeholder="默认为：“0 0 0 200 200 200 200 0”" style="width:470px;display:inline">
+		　　<input type='text' id='curve' class="form-control" placeholder="默认为：“-200 200 100 100 150 0 100 -100 -100 -100 -150 0”" style="width:470px;display:inline">
 		<button id='add-button' class="btn btn-info" onclick="javascript:curve()" style="display:inline">OK</button>
-		
+
 		<br>
 		<br><br><br>
 	</div>
@@ -176,7 +176,7 @@ function init () {
 	ctx.restore()
 	ctx.clearRect(0,0,w,h)
 	window.points = range((x)=>range((x)=>0,w),range(h))
-	ctx.save() 
+	ctx.save()
 	ctx.translate(w/2,h/2)
 	ctx.strokeStyle = axesColor
 	ctx.beginPath()
@@ -283,7 +283,7 @@ Line = function  (points) {
 	o.x= o.b[0]-o.e[0]
 	o.y= o.b[1]-o.e[1]
 	o.k= o.y/o.x  //斜率
-	o.min=o.b[1]  
+	o.min=o.b[1]
 
 	o.now=o.b[0] // 这条线当前与扫描线的交点的横坐标
 	o.d=1/o.k  // delt x  增量
@@ -306,7 +306,7 @@ fill = function  () {
 		if( i in net){// 若有第一次出现的边 则加入AET
 			aet=[...aet,...net[i]]
 		}
-		var tag=[] 
+		var tag=[]
 		for (var j = 0; j < aet.length; j++) {
 			//递增x并记录将被清除的活性边
 			aet[j].now+=aet[j].d
@@ -323,10 +323,10 @@ fill = function  () {
 				}
 			}
 			aet = tmp
-		};			
-		//排序	
+		};
+		//排序
 		aet.sort((x,y)=>x.now>y.now)
-		
+
 		for (var j = 0; j < aet.length; j+=2) {
 			// 成对画水平线
 			drawL(i, aet[j].now,aet[j+1].now)
@@ -337,7 +337,7 @@ fill = function  () {
 }
 
 function curve(){
-	var str=$('#curve').val()||'0 0 0 200 200 200 200 0'
+	var str=$('#curve').val()||'-200 200 100 100 150 0 100 -100 -100 -100 -150 0'
 	'1 1 99 -99 -200 10'
 	var points = strToPoints(str,true) // 将输入转换为点的数组
 
@@ -385,7 +385,7 @@ function tran() {
 	// 生成单位矩阵的函数
 	matrix =()=>range((x)=>range((y)=>x==y?1:0,3),3)
 
-	// 点p乘矩阵t 返回新的点 
+	// 点p乘矩阵t 返回新的点
 	mul=(p, t)=>[
 					p[0]*t[0][0]+p[1]*t[1][0]+(p[2]||1)*t[2][0],
 					p[0]*t[0][1]+p[1]*t[1][1]+(p[2]||1)*t[2][1],
@@ -395,7 +395,7 @@ function tran() {
 	function rotate(t,du){
 		// 将t变为 能旋转 du度的矩阵
 		var rad = Math.PI*du/180
-		
+
 		t[0][0] = Math.cos(rad)
 		t[0][1] = Math.sin(rad)
 		t[1][0] =-Math.sin(rad)
@@ -413,7 +413,7 @@ function tran() {
 	]
 	// 先相对旋转点平移
 	var t=matrix()  // 生成单位矩阵
-	t[2][0]=-rotatePoint[0]  
+	t[2][0]=-rotatePoint[0]
 	t[2][1]=-rotatePoint[1]
 	points=mapMul(points,t)
 	// 旋转
