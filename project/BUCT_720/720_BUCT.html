@@ -1,0 +1,123 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<!--
+ 	// author:小磊
+	// mail:ylxx@live.com
+	// GitHub:@diyer22 -->
+	<meta charset="UTF-8">
+	<title>北京化工大学全景图</title>
+	<!-- <script src="./js/jquery.min.js">
+	</script>
+	<script src="./js/bootstrap.min.js">
+	</script>
+	<link href="./js/bootstrap.min.css" rel="stylesheet" type="text/css"> -->
+	<!-- <link href="http://apps.bdimg.com/libs/bootstrap/3.3.0/css/bootstrap.min.css" rel="stylesheet"> -->
+    <script src="http://apps.bdimg.com/libs/jquery/2.0.0/jquery.min.js"></script>
+
+
+	<style>
+
+	</style>
+
+	<script>
+	// author:小磊
+	// mail:ylxx@live.com
+	// GitHub:@diyer22
+function debug(x){  //debug
+
+  var div = document.getElementById('debug');
+  div.innerHTML = x+'<br><br>'+div.innerHTML
+
+}
+
+function deepCopy(p, c) {
+	var c = c || {};
+	for (var i in p) {
+		if (typeof p[i] === 'object') {
+			c[i] = (p[i].constructor === Array) ? [] : {};
+			deepCopy(p[i], c[i]);
+		} else {
+			c[i] = p[i];
+		}
+	}
+	return c;
+}
+
+
+int = parseInt
+float = parseFloat
+pow = Math.pow
+log = console.log
+
+info = console.info
+table = console.table
+len= (x)=>x.length
+rn = (x)=>int(x*Math.random())
+sum = (arr)=>{
+        var summ = 0
+        for (var i in arr){
+                summ += arr[i]
+        }
+        return summ
+}
+function range (f,n,max) {
+	// 1.Python 用法
+	// 2.执行 f(n['property']) 并返回新的 [] 或 {}
+	// range(10) =>[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+	// range(x=>x*2,5,10) =>[10, 12, 14, 16, 18]
+	// range(x=>x+x,['a', 'b', 'c'])
+	// =>["aa", "bb", "cc"]
+
+	var flag = (typeof f == "number")
+
+	if(flag){
+		max =(typeof n == "number")?n:max
+		n = f
+		f = x=>x
+	}
+	var items = n
+	var obj = (n.constructor === Array)?[]:{}
+	if(typeof n == "number"){
+		obj = []
+		items = []
+		var i=max?n:0
+		max=max||n
+		while(i!=max){items.push(i);i++}
+	}
+
+ 	for (var i in items) {
+ 		obj[i]=f(items[i])
+ 	}
+ 	return obj
+ }
+
+
+	</script>
+
+</head>
+
+<body style="background:#999">
+
+	<div id="main" style="text-align:center">
+		<h1 style="color:#ffffff;">北 化 全 景</h1>
+		<div id="QR-code" style="text-align:center">
+			
+			<a target="_blank" href="https://720yun.com/t/08925qOOx1r">
+				<img src="./mainBUCT.png" style="width:80%;left:10%;border:10px  solid  white;border-radius:15px">
+			</a>
+
+			<br><br><br>
+
+			<a target="_blank" href="https://720yun.com/t/95e2e9iuuua">
+				<img src="./ChangPingBUCT.png" style="width:80%;left:10%;border:10px  solid  white;border-radius:15px">
+			</a>
+
+			<br><br><br>
+		</div>	
+
+	<div>
+</body>
+
+</html>
