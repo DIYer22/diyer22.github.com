@@ -2,7 +2,6 @@
     margin: 0;
     padding: 0;
 }
-
 body {
     background: #e0e0e0;
     font-family: 'Helvetica Neue', Helvetica, 'Lucida Grande', Arial, 'Hiragino Sans GB', 微软雅黑, 'WenQuanYi Micro Hei', STHeiti, SimSun, sans-serif;
@@ -187,6 +186,10 @@ h2 {
 .main-info span {
     color: #000;
     font-size: 16px;
+}
+.contact {
+    font-size: 50px;
+    background-color: blue;
 }
 
 h3 {
