@@ -2,7 +2,7 @@
 
 院校  `北京化工大学计算机系`
 
-邮箱  `ylxx@live.com`
+邮箱  `y***@l**e.com`
 
 GitHub  `@diyer22`
 
